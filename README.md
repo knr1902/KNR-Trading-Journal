@@ -1,0 +1,1 @@
+# KNR-Trading-Journal
