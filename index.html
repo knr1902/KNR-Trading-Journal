@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KNR Capital Journal Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #e0e7ff;
+      --bg-body: #f3f4f6;
+      --bg-card: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --radius: 16px;
+      --success: #10b981;
+      --danger: #ef4444;
+      --accent-blue: #3b82f6;
+      --closed-bg: #f9fafb;
+      --closed-text: #9ca3af;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      padding: 24px;
+    }
+
+    /* --- LAYOUT --- */
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; background: var(--bg-card); padding: 16px 24px;
+      border-radius: var(--radius); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 16px;
+    }
+
+    .main-grid {
+      display: grid; grid-template-columns: 380px 1fr; gap: 24px;
+      max-width: 1600px; margin: 0 auto;
+    }
+
+    @media (max-width: 1200px) { .main-grid { grid-template-columns: 1fr; } }
+
+    /* --- CARDS --- */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .card-header {
+      font-weight: 700; font-size: 1.1rem; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* --- STATS DASHBOARD --- */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; margin-bottom: 24px;
+      max-width: 1600px; margin: 0 auto 32px auto;
+    }
+    .stat-card {
+      background: var(--bg-card); padding: 20px; border-radius: var(--radius);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center; border: 1px solid var(--border);
+    }
+    .stat-val { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+    .stat-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+
+    /* --- CHARTS ROW --- */
+    .charts-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;
+    }
+    @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+    
+    .chart-box {
+      background: var(--bg-card); padding: 20px; border-radius: var(--radius);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border);
+      height: 400px; position: relative;
+    }
+
+    /* --- FORMS --- */
+    .form-group { margin-bottom: 16px; }
+    label {
+      display: block; font-size: 0.75rem; font-weight: 700;
+      color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    input, select {
+      width: 100%; padding: 12px 16px;
+      border: 1px solid var(--border); border-radius: 12px;
+      background: #f9fafb; color: var(--text-main);
+      font-size: 0.95rem; transition: 0.2s;
+    }
+    input:focus, select:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light); background: #fff;
+    }
+
+    /* --- IMPROVED FILTER BOX --- */
+    .filter-box {
+      background: var(--bg-card); padding: 24px; border-radius: var(--radius);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 24px; border: 1px solid var(--border);
+    }
+    
+    /* New Cleaner Slider CSS */
+    .range-slider-wrapper {
+      position: relative; height: 40px; margin-top: 15px;
+    }
+    .slider-track-bg {
+      position: absolute; top: 50%; left: 0; right: 0; height: 6px;
+      background: #e5e7eb; border-radius: 3px; transform: translateY(-50%); z-index: 1;
+    }
+    .slider-track-fill {
+      position: absolute; top: 50%; height: 6px;
+      background: var(--primary); border-radius: 3px; transform: translateY(-50%); z-index: 2;
+    }
+    .range-input {
+      position: absolute; width: 100%; top: 50%; transform: translateY(-50%);
+      background: none; pointer-events: none; -webkit-appearance: none; z-index: 3;
+    }
+    .range-input::-webkit-slider-thumb {
+      pointer-events: auto; -webkit-appearance: none;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #fff; border: 2px solid var(--primary);
+      cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      margin-top: -8px; 
+    }
+    .range-input::-moz-range-thumb {
+      pointer-events: auto; width: 22px; height: 22px; border-radius: 50%;
+      background: #fff; border: 2px solid var(--primary);
+      cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    /* --- INSTRUMENT TOGGLES --- */
+    .inst-toggles {
+      display: flex; gap: 12px; align-items: center; background: #f9fafb;
+      padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border);
+      justify-content: space-between; 
+      margin-bottom: 16px; 
+    }
+    .toggle-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
+    .toggle-item input { width: auto; margin: 0; cursor: pointer; accent-color: var(--primary); }
+
+    /* --- BUTTONS --- */
+    .btn {
+      padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer;
+      border: none; font-size: 0.9rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); width: 100%; }
+    .btn-outline:hover { background: #f3f4f6; color: var(--danger); border-color: var(--danger); }
+    .btn-cloud { background: #8b5cf6; color: white; font-size: 0.9rem; padding: 10px 20px; }
+    .btn-clear { background: #ef4444; color: white; font-size: 0.9rem; padding: 10px 20px; }
+    .btn-clear:hover { background: #dc2626; }
+    .btn-fy { background: #059669; color: white; font-size: 0.9rem; padding: 10px 20px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); }
+    .btn-fy:hover { background: #047857; transform: translateY(-1px); }
+    .btn-past { background: var(--primary); color: white; font-size: 0.9rem; padding: 10px 20px; }
+
+    /* --- TABS --- */
+    .tabs { display: flex; gap: 12px; margin-bottom: 24px; background: #f3f4f6; padding: 4px; border-radius: 14px; }
+    .tab-btn {
+      flex: 1; padding: 10px; text-align: center; border-radius: 10px; cursor: pointer;
+      font-weight: 600; font-size: 0.9rem; color: var(--text-muted); transition: 0.2s;
+    }
+    .tab-btn.active { background: #fff; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+    /* --- TABLE --- */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 600px; }
+    th { text-align: left; padding: 16px; background: #f9fafb; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
+    td { padding: 16px; border-bottom: 1px solid var(--border); color: var(--text-main); }
+    
+    .summary-table td { padding: 12px 16px; }
+    .summary-total-row td { 
+      background: #f8fafc; font-weight: 700; color: var(--text-main); 
+      border-top: 2px solid var(--border); border-bottom: none;
+    }
+    .profit-val { font-weight: 700; }
+
+    tr.closed-row td {
+      background: var(--closed-bg);
+      color: var(--closed-text);
+      font-style: italic;
+    }
+    tr.closed-row td b { color: var(--text-muted); }
+    
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+    .badge-buy { background: #d1fae5; color: #065f46; }
+    .badge-sell { background: #fee2e2; color: #991b1b; }
+    .badge-eq { background: #e0e7ff; color: #3730a3; }
+    .badge-closed { background: #e5e7eb; color: #6b7280; font-weight: 800; letter-spacing: 0.5px; }
+
+    #notify {
+      position: fixed; top: 20px; right: 20px; padding: 12px 24px;
+      border-radius: 12px; background: #1f2937; color: white;
+      transform: translateY(-150%); transition: 0.3s; z-index: 999; font-weight: 500;
+    }
+    #notify.show { transform: translateY(0); }
+    #notify.success { background: var(--success); }
+    #notify.error { background: var(--danger); }
+
+  </style>
+</head>
+<body>
+
+  <div id="notify">Notification</div>
+
+  <div class="top-bar" style="max-width: 1600px; margin: 0 auto 32px auto;">
+    <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+      <div>
+        <h2 style="font-weight:800; color: var(--primary); font-size: 1.8rem; margin:0;">KNR Capital Journal</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin:0;">Professional Trading Dashboard</p>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:12px;">
+       <button id="importBtn" class="btn btn-past" onclick="document.getElementById('importInput').click()">📂 Import Past Data</button>
+       <button id="setFyBtn" class="btn btn-fy" onclick="setFYData()">📅 Set data for FY</button>
+       
+       <button onclick="clearLocalData()" class="btn btn-clear">🗑️ Clear Web Data</button>
+       <button onclick="fetchFromCloud()" class="btn btn-cloud">☁️ Cloud Pull</button>
+       
+       <input type="file" id="importInput" style="display:none" accept=".xlsx,.xls,.csv" onchange="importData(this)">
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-val" id="d_val">₹0.00</div>
+      <div class="stat-lbl">Total Portfolio Value</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="d_pl" style="color: var(--success);">₹0.00</div>
+      <div class="stat-lbl">Total P&L</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="d_ret">0.00%</div>
+      <div class="stat-lbl">Overall Return</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="d_cagr">0.00%</div>
+      <div class="stat-lbl">CAGR</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="d_pos">0</div>
+      <div class="stat-lbl">Active Positions</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    
+    <div>
+      
+      <div class="filter-box">
+        <div class="card-header">🔍 Filter Holdings</div>
+        
+        <div class="form-group">
+          <label>Filter by Portfolio</label>
+          <select id="filter_port" onchange="calculateStats()">
+            <option value="All">All Portfolios</option>
+            <option>KNR Core</option>
+            <option>KNR Satellite</option>
+            <option>KNR EME</option>
+            <option>Rohith Core</option>
+            <option>Rama Core</option>
+            <option>Surya Core</option>
+            <option>Surya EME</option>
+            <option>Siva Core</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+            <label>Filter by Person</label>
+            <select id="filter_person" onchange="calculateStats()">
+              <option value="All">All Persons</option>
+              <option>Nagendra</option>
+              <option>Surya Kumari</option>
+              <option>Rohith</option>
+              <option>Ramakrishna</option>
+              <option>Siva Reddy</option>
+            </select>
+        </div>
+
+        <label>Filter by Instrument Type</label>
+        <div class="inst-toggles">
+          <label class="toggle-item"><input type="checkbox" id="checkEq" checked onchange="calculateStats()"> 🏛️ Eq</label>
+          <label class="toggle-item"><input type="checkbox" id="checkDebt" checked onchange="calculateStats()"> 🏦 Debt</label>
+          <label class="toggle-item"><input type="checkbox" id="checkComm" checked onchange="calculateStats()"> 🥇 Comm</label>
+        </div>
+        
+        <label>Value Range (₹) <span style="font-weight:400; font-size:0.8em; color:#6b7280; margin-left:8px;">(Set Min=0 to see Closed Positions)</span></label>
+        <div style="display:flex; gap:12px; margin-bottom:8px;">
+            <input type="number" id="filter_min" value="0" min="0" onchange="syncSlider('min')">
+            <input type="number" id="filter_max" value="1000000" min="0" onchange="syncSlider('max')">
+        </div>
+        
+        <div class="range-slider-wrapper">
+            <div class="slider-track-bg"></div>
+            <div class="slider-track-fill" id="sliderFill"></div>
+            <input type="range" min="0" max="1000000" value="0" id="sliderMin" class="range-input" oninput="syncInputs('min')">
+            <input type="range" min="0" max="1000000" value="1000000" id="sliderMax" class="range-input" oninput="syncInputs('max')">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">💰 Add Transaction</div>
+        
+        <div class="tabs">
+          <div class="tab-btn active" onclick="switchTab('eq')" id="tab-eq">Equity / Debt</div>
+          <div class="tab-btn" onclick="switchTab('fo')" id="tab-fo">F&O</div>
+        </div>
+
+        <form id="eqForm">
+          <div class="form-group"><label>📅 Date</label><input type="date" id="eq_date" required></div>
+          
+          <div class="form-group">
+              <label>🏷️ Scrip Name</label>
+              <input type="text" id="eq_scrip" placeholder="e.g. RELIANCE" list="scrip_suggestions" required>
+              <datalist id="scrip_suggestions"></datalist>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group"><label>💵 Price</label><input type="number" step="any" id="eq_price" placeholder="0.00" required></div>
+            <div class="form-group"><label>📊 Qty</label><input type="number" step="any" id="eq_qty" placeholder="1" required></div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group"><label>Type</label><select id="eq_type"><option>Buy</option><option>Sell</option></select></div>
+            <div class="form-group"><label>Instrument</label><select id="eq_inst"><option>Equity</option><option>Debt</option><option>Commodity</option></select></div>
+          </div>
+          <div class="form-group"><label>👤 Person</label><select id="eq_person"><option>Nagendra</option><option>Surya Kumari</option><option>Rohith</option><option>Ramakrishna</option><option>Siva Reddy</option></select></div>
+          <div class="form-group"><label>📂 Portfolio</label>
+            <select id="eq_port">
+              <option>KNR Core</option>
+              <option>KNR Satellite</option>
+              <option>KNR EME</option>
+              <option>Rohith Core</option>
+              <option>Rama Core</option>
+              <option>Surya Core</option>
+              <option>Surya EME</option>
+              <option>Siva Core</option>
+            </select>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:24px;">
+            <button type="button" class="btn btn-outline" onclick="this.form.reset(); setToday('eq_date')">Clear</button>
+            <button type="submit" class="btn btn-primary" id="eqBtn">Add & Save</button>
+          </div>
+        </form>
+
+        <form id="foForm" style="display:none;">
+           <div class="form-group"><label>📅 Date</label><input type="date" id="fo_date" required></div>
+           
+           <div class="form-group">
+               <label>🎯 Name</label>
+               <input type="text" id="fo_name" placeholder="e.g. NIFTY 27 JAN" list="fo_suggestions" required>
+               <datalist id="fo_suggestions"></datalist>
+           </div>
+
+           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group"><label>Lot Size</label><input type="number" id="fo_lotsize" value="50"></div>
+            <div class="form-group"><label>Lots</label><input type="number" id="fo_lots" value="1"></div>
+          </div>
+           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group"><label>Price</label><input type="number" step="any" id="fo_price"></div>
+            <div class="form-group"><label>Type</label><select id="fo_type"><option>Long</option><option>Short</option></select></div>
+          </div>
+           <div class="form-group"><label>👤 Person</label>
+            <select id="fo_person">
+              <option>Nagendra</option>
+              <option>Surya Kumari</option>
+              <option>Rohith</option>
+              <option>Ramakrishna</option>
+              <option>Siva Reddy</option>
+            </select>
+           </div>
+
+           <div class="form-group"><label>📂 Portfolio</label>
+            <select id="fo_port">
+              <option>KNR Core</option>
+              <option>KNR Satellite</option>
+              <option>KNR EME</option>
+              <option>Rohith Core</option>
+              <option>Rama Core</option>
+              <option>Surya Core</option>
+              <option>Surya EME</option>
+              <option>Siva Core</option>
+            </select>
+           </div>
+           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:24px;">
+            <button type="button" class="btn btn-outline" onclick="this.form.reset(); setToday('fo_date')">Clear</button>
+            <button type="submit" class="btn btn-primary" id="foBtn">Add & Save</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <div>
+      
+      <div class="charts-row">
+        <div class="chart-box">
+          <div class="card-header">💼 Value by Scrip</div>
+          <div style="height:320px"><canvas id="chartScrip"></canvas></div>
+        </div>
+        <div class="chart-box">
+          <div class="card-header">📊 Value by Instrument</div>
+          <div style="height:320px"><canvas id="chartInst"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📈 Holdings Summary</div>
+        
+        <h4 style="margin: 0 0 12px 0; color:var(--text-muted); font-size:0.9rem;">💼 Equity / Debt / Commodity</h4>
+        <div class="table-container">
+            <table class="summary-table" id="eqSummaryTable">
+                <thead>
+                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">💰 Total Realized Profit:</td><td colspan="2" id="sum_real_pl">₹0.00</td></tr>
+                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">📊 Total Unrealized Profit:</td><td colspan="2" id="sum_unreal_pl">₹0.00</td></tr>
+                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">📈 Total Realized Return %:</td><td colspan="2" id="sum_real_ret">0.00%</td></tr>
+                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">🚀 Total Unrealized Return %:</td><td colspan="2" id="sum_unreal_ret">0.00%</td></tr>
+                    <tr><th>Scrip</th><th>Instrument</th><th>Net Qty</th><th>Avg Price</th><th>Realized P&L</th><th>Unrealized P&L</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <h4 style="margin: 32px 0 12px 0; color:var(--text-muted); font-size:0.9rem;">⚡ F&O (Futures & Options)</h4>
+        <div class="table-container">
+            <table class="summary-table" id="foSummaryTable">
+                <thead>
+                    <tr class="summary-total-row"><td colspan="5" style="text-align:right">🎯 Total F&O Return:</td><td id="sum_fo_pl">₹0.00</td></tr>
+                    <tr><th>Name</th><th>Lot Size</th><th>Net Lots</th><th>Net Qty</th><th>Avg Price</th><th>P&L</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+      </div>
+
+      <div class="card">
+        <div class="card-header">📋 Recent Transactions</div>
+        <div class="table-container">
+          <table id="txTable">
+            <thead><tr><th>Type</th><th>Date</th><th>Scrip / Name</th><th>Details</th><th>Price</th><th>Port.</th><th>Act</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbyRI7TKKg13i2A6tGRu5jWatVeP0VJiWY5Po6HcJCEQ8N69YKjpWfdij4BXA4A1CfV9/exec';
+    
+    let transactions = JSON.parse(localStorage.getItem('knr_journal_final') || '[]');
+    let ltpMap = {};
+    let chartS = null;
+    let chartI = null;
+
+    // --- UI HELPERS ---
+    function notify(msg, type='success') { const el=document.getElementById('notify'); el.textContent=msg; el.className=type; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
+    function setToday(id) { document.getElementById(id).value = new Date().toISOString().split('T')[0]; }
+    function fmtMoney(n) { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(n); }
+    function switchTab(t) { document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); document.getElementById('eqForm').style.display=t==='eq'?'block':'none'; document.getElementById('foForm').style.display=t==='fo'?'block':'none'; }
+
+    // --- AUTOCOMPLETE LOGIC ---
+    function updateSuggestions() {
+      const eqSet = new Set();
+      const foSet = new Set();
+      
+      transactions.forEach(t => {
+        if(t.section === 'EQ' && t.scrip) eqSet.add(t.scrip.toUpperCase());
+        if(t.section === 'FO' && t.name) foSet.add(t.name.toUpperCase());
+      });
+
+      const eqList = document.getElementById('scrip_suggestions');
+      eqList.innerHTML = '';
+      [...eqSet].sort().forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        eqList.appendChild(opt);
+      });
+
+      const foList = document.getElementById('fo_suggestions');
+      foList.innerHTML = '';
+      [...foSet].sort().forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        foList.appendChild(opt);
+      });
+    }
+
+    // --- SLIDER LOGIC ---
+    function syncInputs(source) {
+        const sMin = document.getElementById('sliderMin');
+        const sMax = document.getElementById('sliderMax');
+        const iMin = document.getElementById('filter_min');
+        const iMax = document.getElementById('filter_max');
+        let minV = parseInt(sMin.value); let maxV = parseInt(sMax.value);
+        if(minV > maxV) { if(source==='min') { sMin.value = maxV; minV = maxV; } else { sMax.value = minV; maxV = minV; } }
+        iMin.value = minV; iMax.value = maxV;
+        updateSliderFill(); calculateStats();
+    }
+    function syncSlider(source) {
+        const sMin = document.getElementById('sliderMin');
+        const sMax = document.getElementById('sliderMax');
+        const iMin = document.getElementById('filter_min');
+        const iMax = document.getElementById('filter_max');
+        let minV = parseInt(iMin.value); let maxV = parseInt(iMax.value);
+        if(maxV > parseInt(sMax.max)) { sMin.max = maxV; sMax.max = maxV; }
+        sMin.value = minV; sMax.value = maxV;
+        updateSliderFill(); calculateStats();
+    }
+    function updateSliderFill() {
+        const sMin = document.getElementById('sliderMin');
+        const sMax = document.getElementById('sliderMax');
+        const fill = document.getElementById('sliderFill');
+        const range = sMin.max - sMin.min;
+        const left = ((sMin.value - sMin.min) / range) * 100;
+        const right = ((sMax.value - sMin.min) / range) * 100;
+        fill.style.left = left + "%"; fill.style.width = (right - left) + "%";
+    }
+
+    // --- SET DATA FOR FY FUNCTION ---
+    async function setFYData() {
+        if(!confirm("⚠️ ATTENTION: This will:\n1. Download your FULL data history.\n2. DELETE all closed positions from this website AND Google Sheet.\n3. KEEP only open holdings as the starting point.\n\nContinue?")) return;
+
+        // 1. Export Data Backup
+        const ws = XLSX.utils.json_to_sheet(transactions);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "FullHistory_Backup");
+        XLSX.writeFile(wb, `Backup_Before_FY_Reset_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+        // 2. Calculate Open Holdings (FIFO)
+        let openTransactions = [];
+
+        // --- Equity ---
+        const eqGroups = {};
+        transactions.filter(t=>t.section==='EQ').forEach(t => {
+            const scripName = String(t.scrip).toUpperCase();
+            const key = `${scripName}||${t.instrument}||${t.person}`;
+            if (!eqGroups[key]) eqGroups[key] = { scrip: scripName, instrument: t.instrument, person: t.person, buys: [], sells: [] };
+            if (t.type === 'Buy') eqGroups[key].buys.push({...t, scrip: scripName});
+            else eqGroups[key].sells.push({...t, scrip: scripName});
+        });
+
+        Object.values(eqGroups).forEach(g => {
+            g.buys.sort((a,b) => new Date(a.date) - new Date(b.date));
+            let qtyToSell = g.sells.reduce((s, x) => s + x.qty, 0);
+            for(let buy of g.buys) {
+                if(qtyToSell > 0) {
+                    if(buy.qty <= qtyToSell) { qtyToSell -= buy.qty; buy.qty = 0; }
+                    else { buy.qty -= qtyToSell; qtyToSell = 0; }
+                }
+                if(buy.qty > 0) openTransactions.push(buy); 
+            }
+        });
+
+        // --- F&O ---
+        const foGroups = {};
+        transactions.filter(t=>t.section==='FO').forEach(t => {
+            const foName = String(t.name).toUpperCase();
+            const key = `${foName}||${t.lotsize}||${t.person}`;
+            if (!foGroups[key]) foGroups[key] = { name: foName, lotsize: t.lotsize, person: t.person, longs: [], shorts: [] };
+            if (t.type === 'Long') foGroups[key].longs.push({...t, name: foName});
+            else foGroups[key].shorts.push({...t, name: foName});
+        });
+
+        Object.values(foGroups).forEach(g => {
+            let totalLong = g.longs.reduce((s,x)=>s+x.lots,0);
+            let totalShort = g.shorts.reduce((s,x)=>s+x.lots,0);
+            const net = totalLong - totalShort;
+            if(net > 0) {
+                g.longs.sort((a,b) => new Date(b.date) - new Date(a.date));
+                let needed = net;
+                for(let l of g.longs) {
+                    if(needed <= 0) break;
+                    let take = Math.min(l.lots, needed);
+                    l.lots = take; openTransactions.push(l); needed -= take;
+                }
+            } else if(net < 0) {
+                g.shorts.sort((a,b) => new Date(b.date) - new Date(a.date));
+                let needed = Math.abs(net);
+                for(let s of g.shorts) {
+                    if(needed <= 0) break;
+                    let take = Math.min(s.lots, needed);
+                    s.lots = take; openTransactions.push(s); needed -= take;
+                }
+            }
+        });
+
+        transactions = openTransactions;
+        saveAndRender();
+        await sendToCloud("overwrite", { transactions: openTransactions }, 'setFyBtn');
+        notify("✅ Data reset! Closed positions deleted from Sheet.", "success");
+    }
+
+    // --- IMPORT PAST DATA ---
+    function importData(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            
+            if(confirm(`Loaded ${jsonData.length} rows. Merge into current view?`)) {
+                jsonData.forEach(row => {
+                    if(row.section && row.date) {
+                        row.scrip = row.scrip ? String(row.scrip).toUpperCase() : row.scrip;
+                        row.name = row.name ? String(row.name).toUpperCase() : row.name;
+                        transactions.push(row);
+                    } else if (row.Scrip || row.Name) { 
+                         if(row.Scrip) {
+                             transactions.push({ section: 'EQ', date: row.Date, scrip: String(row.Scrip).trim().toUpperCase(), price: row.Price, qty: row.Qty, type: row.Type, instrument: row.Instrument, person: row.Person, portfolio: row.Portfolio, id: Math.random()});
+                         } else {
+                             transactions.push({ section: 'FO', date: row.Date, name: String(row.Name).trim().toUpperCase(), lotsize: row.LotSize, price: row.Price, lots: row.Lots, type: row.Type, person: row.Person, portfolio: row.Portfolio, id: Math.random()});
+                         }
+                    }
+                });
+                saveAndRender();
+                notify("Import Successful!");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // --- CLEAR LOCAL DATA ---
+    function clearLocalData() {
+        if(confirm("⚠️ This will clear all data from this website only. Your Google Sheet will NOT be deleted. Continue?")) {
+            localStorage.removeItem('knr_journal_final'); transactions = []; ltpMap = {}; renderTable(); calculateStats(); notify("Website data cleared!", "success");
+        }
+    }
+
+    // --- CLOUD SYNC ---
+    async function sendToCloud(action, payload, btnId) {
+      if(btnId) { var btn=document.getElementById(btnId); var txt=btn.textContent; btn.textContent="⏳"; btn.disabled=true; }
+      try {
+        const body = action === 'overwrite' ? { action: action, transactions: payload.transactions } : { action: action, tx: payload };
+        await fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+        notify(action==="append"?"Saved to Cloud!": action==="overwrite" ? "Cloud Sheet Overwritten!" : action==="deleteLTP" ? "Deleted from LTP Tab!" : "Deleted from Cloud!");
+      } catch(e) { notify("Cloud Error", "error"); }
+      if(btnId) { btn.textContent=txt; btn.disabled=false; }
+    }
+
+    function saveAndRender() { 
+        localStorage.setItem('knr_journal_final', JSON.stringify(transactions)); 
+        renderTable(); 
+        calculateStats(); 
+        updateSuggestions();
+    }
+
+    document.getElementById('eqForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const tx = { section: 'EQ', date: document.getElementById('eq_date').value, scrip: document.getElementById('eq_scrip').value.trim().toUpperCase(), price: Number(document.getElementById('eq_price').value), qty: Number(document.getElementById('eq_qty').value), type: document.getElementById('eq_type').value, instrument: document.getElementById('eq_inst').value, person: document.getElementById('eq_person').value, portfolio: document.getElementById('eq_port').value, id: Date.now() };
+      transactions.push(tx); saveAndRender(); await sendToCloud("append", tx, 'eqBtn'); e.target.reset(); setToday('eq_date');
+    });
+
+    document.getElementById('foForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const tx = { section: 'FO', date: document.getElementById('fo_date').value, name: document.getElementById('fo_name').value.trim().toUpperCase(), lotsize: Number(document.getElementById('fo_lotsize').value), lots: Number(document.getElementById('fo_lots').value), price: Number(document.getElementById('fo_price').value), type: document.getElementById('fo_type').value, person: document.getElementById('fo_person').value, portfolio: document.getElementById('fo_port').value, id: Date.now() };
+      transactions.push(tx); saveAndRender(); await sendToCloud("append", tx, 'foBtn'); e.target.reset(); setToday('fo_date');
+    });
+
+    // --- UPDATED DELETE FUNCTION ---
+    async function deleteTx(id, btn) {
+      const tx = transactions.find(t => t.id === id);
+      if(!tx || !confirm("Delete this transaction?")) return;
+
+      // 1. Remove from Local Data
+      transactions = transactions.filter(t => t.id !== id);
+      saveAndRender();
+
+      // 2. Remove from Cloud (Transaction Tab)
+      await sendToCloud("delete", tx, btn);
+
+      // 3. Remove from LTP Tab (The new requirement)
+      // Only for Equity/Debt which has 'scrip'
+      if(tx.section === 'EQ' && tx.scrip) {
+          const scripName = tx.scrip;
+          // Ask confirmation to be safe, so you don't delete scrips used by other transactions
+          if(confirm(`Do you also want to delete "${scripName}" from the LTP Watchlist?`)) {
+             await sendToCloud("deleteLTP", { scrip: scripName }, btn);
+             
+             // Remove from local map immediately so UI updates
+             delete ltpMap[scripName]; 
+             const clean = scripName.replace('NSE:', '').replace('BSE:', '').replace('-EQ', '').trim();
+             delete ltpMap[clean];
+             
+             calculateStats();
+          }
+      }
+    }
+
+    function renderTable() {
+      const tb = document.querySelector('#txTable tbody'); tb.innerHTML = '';
+      [...transactions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,50).forEach(t => {
+        const tr = document.createElement('tr');
+        if(t.section === 'EQ') {
+          tr.innerHTML = `<td><span class="badge ${t.type==='Buy'?'badge-buy':'badge-sell'}">${t.type}</span></td><td>${t.date}</td><td><b>${t.scrip}</b><br><small>${t.instrument}</small></td><td>${t.qty}</td><td>₹${t.price}</td><td>${t.portfolio}</td><td><button onclick="deleteTx(${t.id}, this)" style="border:none;background:none;cursor:pointer;">🗑️</button></td>`;
+        } else {
+           tr.innerHTML = `<td><span class="badge badge-buy">F&O</span></td><td>${t.date}</td><td><b>${t.name}</b></td><td>${t.lots} Lots</td><td>₹${t.price}</td><td>${t.portfolio}</td><td><button onclick="deleteTx(${t.id}, this)" style="border:none;background:none;cursor:pointer;">🗑️</button></td>`;
+        }
+        tb.appendChild(tr);
+      });
+    }
+
+    // --- MAIN LOGIC ---
+    function calculateStats() {
+      const portFilter = document.getElementById('filter_port').value;
+      const personFilter = document.getElementById('filter_person').value;
+      const minVal = Number(document.getElementById('filter_min').value);
+      const maxVal = Number(document.getElementById('filter_max').value);
+      
+      const showEq = document.getElementById('checkEq').checked;
+      const showDebt = document.getElementById('checkDebt').checked;
+      const showComm = document.getElementById('checkComm').checked;
+
+      const filtered = transactions.filter(t => {
+        if(portFilter !== 'All' && t.portfolio !== portFilter) return false;
+        if(personFilter !== 'All' && t.person !== personFilter) return false;
+        if(t.section === 'EQ') {
+            if(t.instrument === 'Equity' && !showEq) return false;
+            if(t.instrument === 'Debt' && !showDebt) return false;
+            if(t.instrument === 'Commodity' && !showComm) return false;
+        }
+        return true;
+      });
+
+      // --- EQ LOGIC ---
+      const eqGroups = {};
+      filtered.filter(t=>t.section==='EQ').forEach(t => {
+        const scripName = String(t.scrip).toUpperCase();
+        const key = `${scripName}||${t.instrument}`;
+        if (!eqGroups[key]) eqGroups[key] = { scrip: scripName, instrument: t.instrument, buys: [], sells: [] };
+        if (t.type === 'Buy') eqGroups[key].buys.push({ ...t, scrip: scripName });
+        else eqGroups[key].sells.push({ ...t, scrip: scripName });
+      });
+
+      let totalVal = 0, totalRealizedPL = 0, totalUnrealizedPL = 0;
+      let totalInvestedActive = 0, totalInvestedRealized = 0;
+      let maxValueFound = 0;
+      let activePosCount = 0;
+      
+      const eqRows = [];
+      const scripData = {}, instData = {};
+
+      Object.values(eqGroups).forEach(g => {
+        g.buys.sort((a,b) => new Date(a.date) - new Date(b.date));
+        let realizedPL = 0, closedCost = 0;
+        
+        g.sells.forEach(s => {
+          let qtyToSell = s.qty;
+          while(qtyToSell > 0 && g.buys.length > 0) {
+             const head = g.buys[0];
+             const take = Math.min(head.qty, qtyToSell);
+             realizedPL += (take * (s.price - head.price));
+             closedCost += (take * head.price);
+             head.qty -= take;
+             qtyToSell -= take;
+             if(head.qty === 0) g.buys.shift();
+          }
+        });
+
+        let netQty = 0, cost = 0;
+        g.buys.forEach(b => { netQty += b.qty; cost += (b.qty * b.price); });
+        
+        const avgPrice = netQty > 0 ? (cost / netQty) : 0;
+        const ltp = ltpMap[g.scrip] || avgPrice; 
+        
+        const currentValue = netQty * ltp;
+        const unrealizedPL = currentValue - cost;
+
+        if(currentValue > maxValueFound) maxValueFound = currentValue;
+
+        const isActive = netQty > 0.01;
+        const hasHistory = Math.abs(realizedPL) > 0.01;
+        const passesFilter = isActive ? (currentValue >= minVal && currentValue <= maxVal) : (minVal === 0);
+
+        if((isActive || hasHistory) && passesFilter) {
+            if(isActive) {
+                totalVal += currentValue; totalUnrealizedPL += unrealizedPL; totalInvestedActive += cost; activePosCount++;
+                scripData[g.scrip] = currentValue; instData[g.instrument] = (instData[g.instrument] || 0) + currentValue;
+            }
+            eqRows.push({ scrip: g.scrip, inst: g.instrument, qty: netQty, avg: avgPrice, real: realizedPL, unreal: unrealizedPL, closed: !isActive });
+        }
+        totalRealizedPL += realizedPL;
+        totalInvestedRealized += closedCost;
+      });
+
+      // --- FO LOGIC ---
+      const foGroups = {};
+      filtered.filter(t=>t.section==='FO').forEach(t => {
+        const foName = String(t.name).toUpperCase();
+        const key = `${foName}||${t.lotsize}`;
+        if (!foGroups[key]) foGroups[key] = { name: foName, lotsize: t.lotsize, longs: [], shorts: [], realizedPL: 0 };
+        if (t.type === 'Long') foGroups[key].longs.push(t);
+        else foGroups[key].shorts.push(t);
+      });
+
+      let totalFOPL = 0;
+      const foRows = [];
+
+      Object.values(foGroups).forEach(g => {
+        const totalLongCost = g.longs.reduce((s,x)=>s+(x.lots*x.price),0);
+        const totalShortProceeds = g.shorts.reduce((s,x)=>s+(x.lots*x.price),0);
+        const totalLongLots = g.longs.reduce((s,x)=>s+x.lots,0);
+        const totalShortLots = g.shorts.reduce((s,x)=>s+x.lots,0);
+        
+        const netLots = totalLongLots - totalShortLots;
+        const ltp = ltpMap[g.name] || 0;
+        
+        let pl = (totalShortProceeds - totalLongCost);
+        if(netLots !== 0 && ltp > 0) { pl += (netLots * ltp * g.lotsize); }
+
+        const isClosed = netLots === 0;
+        if(!isClosed || Math.abs(pl) > 1) {
+             foRows.push({ 
+                 name: g.name, lotsize: g.lotsize, netLots: netLots, 
+                 netQty: netLots * g.lotsize, avgPrice: 0, pl: pl, closed: isClosed 
+             });
+             totalFOPL += pl;
+        }
+      });
+
+
+      // --- RENDER TABLES ---
+      const tbEq = document.querySelector('#eqSummaryTable tbody'); tbEq.innerHTML = '';
+      eqRows.forEach(r => {
+        const tr = document.createElement('tr'); if(r.closed) tr.classList.add('closed-row');
+        tr.innerHTML = `<td><b>${r.scrip}</b></td><td><span class="badge badge-eq">${r.inst}</span></td>
+        <td>${r.closed ? '<span class="badge badge-closed">CLOSED</span>' : r.qty.toFixed(2)}</td>
+        <td>${r.closed ? '-' : '₹'+r.avg.toFixed(2)}</td><td class="${r.real>=0?'success':'danger'} profit-val">₹${r.real.toFixed(2)}</td><td class="${r.unreal>=0?'success':'danger'} profit-val">${r.closed ? '-' : '₹'+r.unreal.toFixed(2)}</td>`;
+        tbEq.appendChild(tr);
+      });
+
+      const tbFo = document.querySelector('#foSummaryTable tbody'); tbFo.innerHTML = '';
+      foRows.forEach(r => {
+        const tr = document.createElement('tr'); if(r.closed) tr.classList.add('closed-row');
+        tr.innerHTML = `<td><b>${r.name}</b></td><td>${r.lotsize}</td>
+        <td>${r.closed ? '<span class="badge badge-closed">CLOSED</span>' : r.netLots}</td>
+        <td>${r.closed ? '-' : r.netQty}</td><td>-</td>
+        <td class="${r.pl>=0?'success':'danger'} profit-val">₹${r.pl.toFixed(2)}</td>`;
+        tbFo.appendChild(tr);
+      });
+
+      if(maxValueFound > parseInt(document.getElementById('sliderMax').max)) {
+        document.getElementById('sliderMin').max = Math.ceil(maxValueFound);
+        document.getElementById('sliderMax').max = Math.ceil(maxValueFound);
+      }
+
+      document.getElementById('sum_real_pl').textContent = fmtMoney(totalRealizedPL);
+      document.getElementById('sum_real_pl').className = totalRealizedPL>=0?'success':'danger';
+      document.getElementById('sum_unreal_pl').textContent = fmtMoney(totalUnrealizedPL);
+      document.getElementById('sum_unreal_pl').className = totalUnrealizedPL>=0?'success':'danger';
+      document.getElementById('sum_fo_pl').textContent = fmtMoney(totalFOPL);
+      document.getElementById('sum_fo_pl').className = totalFOPL>=0?'success':'danger';
+
+      const realRet = totalInvestedRealized > 0 ? (totalRealizedPL/totalInvestedRealized)*100 : 0;
+      document.getElementById('sum_real_ret').textContent = realRet.toFixed(2) + '%';
+      const unrealRet = totalInvestedActive > 0 ? (totalUnrealizedPL/totalInvestedActive)*100 : 0;
+      document.getElementById('sum_unreal_ret').textContent = unrealRet.toFixed(2) + '%';
+
+      const totalPL = totalRealizedPL + totalUnrealizedPL + totalFOPL;
+      const totalInvested = totalInvestedActive + totalInvestedRealized;
+      const overallRet = totalInvested > 0 ? (totalPL/totalInvested)*100 : 0;
+
+      document.getElementById('d_val').textContent = fmtMoney(totalVal);
+      document.getElementById('d_pl').textContent = fmtMoney(totalPL);
+      document.getElementById('d_pl').style.color = totalPL>=0 ? 'var(--success)' : 'var(--danger)';
+      document.getElementById('d_ret').textContent = overallRet.toFixed(2) + '%';
+      document.getElementById('d_pos').textContent = activePosCount;
+      document.getElementById('d_cagr').textContent = overallRet.toFixed(2) + '%'; 
+
+      updateCharts(scripData, instData);
+    }
+
+    function updateCharts(scripD, instD) {
+      const ctxS = document.getElementById('chartScrip').getContext('2d');
+      const ctxI = document.getElementById('chartInst').getContext('2d');
+      if(chartS) chartS.destroy(); if(chartI) chartI.destroy();
+      const commonOpts = { plugins: { legend: { display:false } }, cutout: '65%', responsive:true, maintainAspectRatio:false };
+      chartS = new Chart(ctxS, { type: 'doughnut', data: { labels: Object.keys(scripD), datasets: [{ data: Object.values(scripD), backgroundColor: ['#818cf8','#34d399','#fbbf24','#f87171','#a78bfa', '#f472b6', '#60a5fa'], borderWidth:0 }] }, options: commonOpts });
+      chartI = new Chart(ctxI, { type: 'doughnut', data: { labels: Object.keys(instD), datasets: [{ data: Object.values(instD), backgroundColor: ['#60a5fa','#c084fc','#f472b6'], borderWidth:0 }] }, options: commonOpts });
+    }
+
+    async function fetchFromCloud() {
+      notify("Fetching LTP...", "success");
+      try {
+        const res = await fetch(CLOUD_URL);
+        const data = await res.json();
+        
+        let newTx = [];
+        if(data.Equity_Debt_Commodity) {
+             data.Equity_Debt_Commodity.forEach(r => { 
+                if(r.Scrip) newTx.push({section:'EQ', date:fmtDate(r.Date), scrip:String(r.Scrip).toUpperCase(), price:Number(r.Price), type:r.Type, qty:Number(r.Qty), instrument:r.Instrument, person:r.Person, portfolio:r.Portfolio, id:Math.random()}); 
+             });
+        }
+        if(data["F&O"]) {
+             data["F&O"].forEach(r => { 
+                if(r.Name) newTx.push({section:'FO', date:fmtDate(r.Date), name:String(r.Name).toUpperCase(), lotsize:Number(r.LotSize), price:Number(r.Price), type:r.Type, lots:Number(r.Lots), person:r.Person, portfolio:r.Portfolio, id:Math.random()}); 
+             });
+        }
+
+        if(data.LTP) { 
+            ltpMap = {}; 
+            data.LTP.forEach(r => { 
+                if(r.Scrip && r.LTP) {
+                    const rawName = String(r.Scrip).toUpperCase().trim();
+                    const price = parseFloat(r.LTP);
+                    if(!isNaN(price)) {
+                        ltpMap[rawName] = price; 
+                        const cleanName = rawName.replace('NSE:', '').replace('BSE:', '').replace('-EQ', '').trim();
+                        ltpMap[cleanName] = price;
+                    }
+                } 
+            }); 
+            console.log("LTP Map Loaded:", ltpMap); 
+        }
+
+        if(newTx.length > 0) {
+            transactions = newTx; 
+            saveAndRender(); 
+        }
+        notify("Synced with Cloud!");
+      } catch(e) { 
+        notify("Fetch Failed", "error"); 
+        console.error(e); 
+      }
+    }
+    function fmtDate(d) { try { return new Date(d).toISOString().split('T')[0]; } catch { return ''; } }
+    
+    window.onload = () => { setToday('eq_date'); setToday('fo_date'); renderTable(); calculateStats(); fetchFromCloud(); updateSliderFill(); };
+  </script>
+</body>
+</html>
