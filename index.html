@@ -31,31 +31,51 @@
       font-family: 'Inter', sans-serif;
       background-color: var(--bg-body);
       color: var(--text-main);
-      padding: 24px;
+      padding: 16px; /* Reduced for mobile */
+    }
+
+    @media (min-width: 768px) {
+      body { padding: 24px; }
     }
 
     /* --- LAYOUT --- */
     .top-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 24px; background: var(--bg-card); padding: 16px 24px;
-      border-radius: var(--radius); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 16px;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      margin-bottom: 24px; 
+      background: var(--bg-card); 
+      padding: 16px 20px;
+      border-radius: var(--radius); 
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+      flex-wrap: wrap; 
+      gap: 16px;
     }
 
     .main-grid {
-      display: grid; grid-template-columns: 380px 1fr; gap: 24px;
-      max-width: 1600px; margin: 0 auto;
+      display: grid; 
+      grid-template-columns: 1fr; /* Default mobile stack */
+      gap: 24px;
+      max-width: 1600px; 
+      margin: 0 auto;
     }
 
-    @media (max-width: 1200px) { .main-grid { grid-template-columns: 1fr; } }
+    @media (min-width: 1200px) { 
+      .main-grid { grid-template-columns: 380px 1fr; } 
+    }
 
     /* --- CARDS --- */
     .card {
       background: var(--bg-card);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 20px;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
       margin-bottom: 24px;
       border: 1px solid var(--border);
+    }
+    
+    @media (min-width: 768px) {
+        .card { padding: 24px; }
     }
 
     .card-header {
@@ -65,33 +85,61 @@
 
     /* --- STATS DASHBOARD --- */
     .stats-row {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px; margin-bottom: 24px;
-      max-width: 1600px; margin: 0 auto 32px auto;
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Better fit for mobile */
+      gap: 12px; 
+      margin-bottom: 24px;
+      max-width: 1600px; 
+      margin: 0 auto 32px auto;
     }
+
+    @media (min-width: 768px) {
+        .stats-row { 
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 16px;
+        }
+    }
+
     .stat-card {
-      background: var(--bg-card); padding: 20px; border-radius: var(--radius);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center; border: 1px solid var(--border);
+      background: var(--bg-card); 
+      padding: 16px; 
+      border-radius: var(--radius);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+      text-align: center; 
+      border: 1px solid var(--border);
     }
-    .stat-val { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
-    .stat-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+    .stat-val { font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+    .stat-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+
+    @media (min-width: 768px) {
+        .stat-val { font-size: 1.6rem; }
+        .stat-lbl { font-size: 0.75rem; }
+    }
 
     /* --- CHARTS ROW --- */
     .charts-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: 20px; 
+      margin-bottom: 24px;
     }
-    @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+    
+    @media (min-width: 900px) { 
+        .charts-row { grid-template-columns: 1fr 1fr; gap: 24px; } 
+    }
     
     .chart-box {
-      background: var(--bg-card); padding: 20px; border-radius: var(--radius);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border);
-      height: 400px; position: relative;
+      background: var(--bg-card); 
+      padding: 16px; 
+      border-radius: var(--radius);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+      border: 1px solid var(--border);
+      height: 350px; 
+      position: relative;
     }
 
-    .chart-box-full {
-      background: var(--bg-card); padding: 20px; border-radius: var(--radius);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border);
-      height: 350px; position: relative; margin-bottom: 24px;
+    @media (min-width: 768px) {
+        .chart-box { padding: 20px; height: 400px; }
     }
 
     /* --- FORMS --- */
@@ -113,8 +161,12 @@
 
     /* --- IMPROVED FILTER BOX --- */
     .filter-box {
-      background: var(--bg-card); padding: 24px; border-radius: var(--radius);
+      background: var(--bg-card); padding: 20px; border-radius: var(--radius);
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 24px; border: 1px solid var(--border);
+    }
+
+    @media (min-width: 768px) {
+        .filter-box { padding: 24px; }
     }
     
     /* New Cleaner Slider CSS */
@@ -148,45 +200,80 @@
 
     /* --- INSTRUMENT TOGGLES --- */
     .inst-toggles {
-      display: flex; gap: 12px; align-items: center; background: #f9fafb;
-      padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border);
+      display: flex; gap: 8px; align-items: center; background: #f9fafb;
+      padding: 10px; border-radius: 12px; border: 1px solid var(--border);
       justify-content: space-between; 
       margin-bottom: 16px; 
+      flex-wrap: wrap; /* Allow wrapping on small screens */
     }
-    .toggle-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
+    .toggle-item { display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 600; font-size: 0.75rem; color: var(--text-main); }
     .toggle-item input { width: auto; margin: 0; cursor: pointer; accent-color: var(--primary); }
+
+    @media (min-width: 768px) {
+        .inst-toggles { padding: 12px 16px; gap: 12px; }
+        .toggle-item { font-size: 0.85rem; gap: 6px; }
+    }
 
     /* --- BUTTONS --- */
     .btn {
-      padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer;
-      border: none; font-size: 0.9rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 16px; border-radius: 12px; font-weight: 600; cursor: pointer;
+      border: none; font-size: 0.85rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    @media (min-width: 768px) {
+        .btn { padding: 12px 24px; font-size: 0.9rem; }
     }
     .btn-primary { background: var(--primary); color: white; width: 100%; }
     .btn-primary:hover { background: #4338ca; }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); width: 100%; }
     .btn-outline:hover { background: #f3f4f6; color: var(--danger); border-color: var(--danger); }
-    .btn-cloud { background: #8b5cf6; color: white; font-size: 0.9rem; padding: 10px 20px; }
-    .btn-clear { background: #ef4444; color: white; font-size: 0.9rem; padding: 10px 20px; }
+    .btn-cloud { background: #8b5cf6; color: white; flex: 1; }
+    .btn-clear { background: #ef4444; color: white; flex: 1; }
     .btn-clear:hover { background: #dc2626; }
-    .btn-fy { background: #059669; color: white; font-size: 0.9rem; padding: 10px 20px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); }
-    .btn-fy:hover { background: #047857; transform: translateY(-1px); }
-    .btn-past { background: var(--primary); color: white; font-size: 0.9rem; padding: 10px 20px; }
+    .btn-fy { background: #059669; color: white; flex: 1; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); }
+    .btn-past { background: var(--primary); color: white; flex: 1; }
 
     /* --- TABS --- */
-    .tabs { display: flex; gap: 12px; margin-bottom: 24px; background: #f3f4f6; padding: 4px; border-radius: 14px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; background: #f3f4f6; padding: 4px; border-radius: 14px; }
     .tab-btn {
-      flex: 1; padding: 10px; text-align: center; border-radius: 10px; cursor: pointer;
-      font-weight: 600; font-size: 0.9rem; color: var(--text-muted); transition: 0.2s;
+      flex: 1; padding: 8px; text-align: center; border-radius: 10px; cursor: pointer;
+      font-weight: 600; font-size: 0.8rem; color: var(--text-muted); transition: 0.2s;
     }
     .tab-btn.active { background: #fff; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
+    @media (min-width: 768px) {
+        .tab-btn { padding: 10px; font-size: 0.9rem; }
+    }
+
+    /* --- P&L TOGGLE BUTTONS --- */
+    .pnl-mode-btn {
+        background: transparent; border: none; padding: 4px 10px; border-radius: 6px;
+        font-size: 0.7rem; font-weight: 700; color: var(--text-muted); cursor: pointer;
+        transition: 0.2s;
+    }
+    .pnl-mode-btn.active {
+        background: #fff; color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
     /* --- TABLE --- */
-    .table-container { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 600px; }
-    th { text-align: left; padding: 16px; background: #f9fafb; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
-    td { padding: 16px; border-bottom: 1px solid var(--border); color: var(--text-main); }
+    .table-container { 
+        overflow-x: auto; 
+        margin: 0 -16px; /* Bleed for mobile */
+        padding: 0 16px;
+    }
+    @media (min-width: 768px) {
+        .table-container { margin: 0; padding: 0; }
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 600px; }
+    th { text-align: left; padding: 12px; background: #f9fafb; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; font-weight: 700; }
+    td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-main); }
     
-    .summary-table td { padding: 12px 16px; }
+    @media (min-width: 768px) {
+        table { font-size: 0.9rem; }
+        th { padding: 16px; font-size: 0.75rem; }
+        td { padding: 16px; }
+    }
+    
+    .summary-table td { padding: 10px 12px; }
     .summary-total-row td { 
       background: #f8fafc; font-weight: 700; color: var(--text-main); 
       border-top: 2px solid var(--border); border-bottom: none;
@@ -200,16 +287,20 @@
     }
     tr.closed-row td b { color: var(--text-muted); }
     
-    .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+    .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
     .badge-buy { background: #d1fae5; color: #065f46; }
     .badge-sell { background: #fee2e2; color: #991b1b; }
     .badge-eq { background: #e0e7ff; color: #3730a3; }
     .badge-closed { background: #e5e7eb; color: #6b7280; font-weight: 800; letter-spacing: 0.5px; }
 
     #notify {
-      position: fixed; top: 20px; right: 20px; padding: 12px 24px;
+      position: fixed; top: 20px; right: 20px; left: 20px; padding: 12px 24px;
       border-radius: 12px; background: #1f2937; color: white;
       transform: translateY(-150%); transition: 0.3s; z-index: 999; font-weight: 500;
+      text-align: center;
+    }
+    @media (min-width: 768px) {
+        #notify { left: auto; width: auto; text-align: left; }
     }
     #notify.show { transform: translateY(0); }
     #notify.success { background: var(--success); }
@@ -224,15 +315,14 @@
   <div class="top-bar" style="max-width: 1600px; margin: 0 auto 32px auto;">
     <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
       <div>
-        <h2 style="font-weight:800; color: var(--primary); font-size: 1.8rem; margin:0;">KNR Capital Journal</h2>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin:0;">Professional Trading Dashboard</p>
+        <h2 style="font-weight:800; color: var(--primary); font-size: 1.5rem; margin:0;">KNR Capital Journal</h2>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin:0;">Professional Trading Dashboard</p>
       </div>
     </div>
 
-    <div style="display:flex; gap:12px;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; width:100%; justify-content: space-between;">
        <button id="importBtn" class="btn btn-past" onclick="document.getElementById('importInput').click()">📂 Import Past Data</button>
        <button id="setFyBtn" class="btn btn-fy" onclick="setFYData()">📅 Set data for FY</button>
-       
        <button onclick="clearLocalData()" class="btn btn-clear">🗑️ Clear Web Data</button>
        <button onclick="fetchFromCloud()" class="btn btn-cloud">☁️ Cloud Pull</button>
        
@@ -243,7 +333,7 @@
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-val" id="d_val">₹0.00</div>
-      <div class="stat-lbl">Total Portfolio Value</div>
+      <div class="stat-lbl">Portfolio</div>
     </div>
     <div class="stat-card">
       <div class="stat-val" id="d_pl" style="color: var(--success);">₹0.00</div>
@@ -251,11 +341,11 @@
     </div>
     <div class="stat-card">
       <div class="stat-val" id="d_ret">0.00%</div>
-      <div class="stat-lbl">Overall Return</div>
+      <div class="stat-lbl">Return</div>
     </div>
     <div class="stat-card">
       <div class="stat-val" id="d_pos">0</div>
-      <div class="stat-lbl">Active Positions</div>
+      <div class="stat-lbl">Active</div>
     </div>
   </div>
 
@@ -295,12 +385,12 @@
 
         <label>Filter by Instrument Type</label>
         <div class="inst-toggles">
-          <label class="toggle-item"><input type="checkbox" id="checkEq" checked onchange="calculateStats()"> 🏛️ Eq</label>
-          <label class="toggle-item"><input type="checkbox" id="checkDebt" checked onchange="calculateStats()"> 🏦 Debt</label>
-          <label class="toggle-item"><input type="checkbox" id="checkComm" checked onchange="calculateStats()"> 🥇 Comm</label>
+          <label class="toggle-item"><input type="checkbox" id="checkEq" checked onchange="calculateStats()"> Eq</label>
+          <label class="toggle-item"><input type="checkbox" id="checkDebt" checked onchange="calculateStats()"> Debt</label>
+          <label class="toggle-item"><input type="checkbox" id="checkComm" checked onchange="calculateStats()"> Comm</label>
         </div>
         
-        <label>Value Range (₹) <span style="font-weight:400; font-size:0.8em; color:#6b7280; margin-left:8px;">(Set Min=0 to see Closed Positions)</span></label>
+        <label>Value Range (₹)</label>
         <div style="display:flex; gap:12px; margin-bottom:8px;">
             <input type="number" id="filter_min" value="0" min="0" onchange="syncSlider('min')">
             <input type="number" id="filter_max" value="1000000" min="0" onchange="syncSlider('max')">
@@ -318,7 +408,7 @@
         <div class="card-header">💰 Add Transaction</div>
         
         <div class="tabs">
-          <div class="tab-btn active" onclick="switchTab('eq')" id="tab-eq">Equity / Debt</div>
+          <div class="tab-btn active" onclick="switchTab('eq')" id="tab-eq">Equity/Debt</div>
           <div class="tab-btn" onclick="switchTab('fo')" id="tab-fo">F&O</div>
         </div>
 
@@ -359,48 +449,48 @@
         </form>
 
         <form id="foForm" style="display:none;">
-           <div class="form-group"><label>📅 Date</label><input type="date" id="fo_date" required></div>
-           
-           <div class="form-group">
-               <label>🎯 Name</label>
-               <input type="text" id="fo_name" placeholder="e.g. NIFTY 27 JAN" list="fo_suggestions" required>
-               <datalist id="fo_suggestions"></datalist>
-           </div>
+            <div class="form-group"><label>📅 Date</label><input type="date" id="fo_date" required></div>
+            
+            <div class="form-group">
+                <label>🎯 Name</label>
+                <input type="text" id="fo_name" placeholder="e.g. NIFTY 27 JAN" list="fo_suggestions" required>
+                <datalist id="fo_suggestions"></datalist>
+            </div>
 
-           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-            <div class="form-group"><label>Lot Size</label><input type="number" id="fo_lotsize" value="50"></div>
-            <div class="form-group"><label>Lots</label><input type="number" id="fo_lots" value="1"></div>
-          </div>
-           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-            <div class="form-group"><label>Price</label><input type="number" step="any" id="fo_price"></div>
-            <div class="form-group"><label>Type</label><select id="fo_type"><option>Long</option><option>Short</option></select></div>
-          </div>
-           <div class="form-group"><label>👤 Person</label>
-            <select id="fo_person">
-              <option>Nagendra</option>
-              <option>Surya Kumari</option>
-              <option>Rohith</option>
-              <option>Ramakrishna</option>
-              <option>Siva Reddy</option>
-            </select>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+             <div class="form-group"><label>Lot Size</label><input type="number" id="fo_lotsize" value="50"></div>
+             <div class="form-group"><label>Lots</label><input type="number" id="fo_lots" value="1"></div>
            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+             <div class="form-group"><label>Price</label><input type="number" step="any" id="fo_price"></div>
+             <div class="form-group"><label>Type</label><select id="fo_type"><option>Long</option><option>Short</option></select></div>
+           </div>
+            <div class="form-group"><label>👤 Person</label>
+             <select id="fo_person">
+               <option>Nagendra</option>
+               <option>Surya Kumari</option>
+               <option>Rohith</option>
+               <option>Ramakrishna</option>
+               <option>Siva Reddy</option>
+             </select>
+            </div>
 
-           <div class="form-group"><label>📂 Portfolio</label>
-            <select id="fo_port">
-              <option>KNR Core</option>
-              <option>KNR Satellite</option>
-              <option>KNR EME</option>
-              <option>Rohith Core</option>
-              <option>Rama Core</option>
-              <option>Surya Core</option>
-              <option>Surya EME</option>
-              <option>Siva Core</option>
-            </select>
+            <div class="form-group"><label>📂 Portfolio</label>
+             <select id="fo_port">
+               <option>KNR Core</option>
+               <option>KNR Satellite</option>
+               <option>KNR EME</option>
+               <option>Rohith Core</option>
+               <option>Rama Core</option>
+               <option>Surya Core</option>
+               <option>Surya EME</option>
+               <option>Siva Core</option>
+             </select>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:24px;">
+             <button type="button" class="btn btn-outline" onclick="this.form.reset(); setToday('fo_date')">Clear</button>
+             <button type="submit" class="btn btn-primary" id="foBtn">Add & Save</button>
            </div>
-           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:24px;">
-            <button type="button" class="btn btn-outline" onclick="this.form.reset(); setToday('fo_date')">Clear</button>
-            <button type="submit" class="btn btn-primary" id="foBtn">Add & Save</button>
-          </div>
         </form>
       </div>
 
@@ -411,49 +501,54 @@
       <div class="charts-row">
         <div class="chart-box">
           <div class="card-header">💼 Value by Scrip</div>
-          <div style="height:320px"><canvas id="chartScrip"></canvas></div>
+          <div style="height:270px"><canvas id="chartScrip"></canvas></div>
         </div>
         <div class="chart-box">
           <div class="card-header">📊 Value by Instrument</div>
-          <div style="height:320px"><canvas id="chartInst"></canvas></div>
+          <div style="height:270px"><canvas id="chartInst"></canvas></div>
         </div>
       </div>
 
       <!-- Trend Graphs -->
       <div class="charts-row">
         <div class="chart-box">
-          <div class="card-header">📈 Portfolio Value (Current FY)</div>
-          <div style="height:320px"><canvas id="chartTrend"></canvas></div>
+          <div class="card-header">📈 Portfolio Value (FY)</div>
+          <div style="height:270px"><canvas id="chartTrend"></canvas></div>
         </div>
         <div class="chart-box">
-          <div class="card-header">💸 Total P&L (Current FY)</div>
-          <div style="height:320px"><canvas id="chartPnLTrend"></canvas></div>
+          <div class="card-header" style="justify-content: space-between;">
+            <span>💸 P&L Trend (FY)</span>
+            <div style="display:flex; gap:4px; background:#f3f4f6; padding:2px; border-radius:8px;">
+                <button onclick="setPnlView('total')" id="pnl-btn-total" class="pnl-mode-btn active">Tot</button>
+                <button onclick="setPnlView('real')" id="pnl-btn-real" class="pnl-mode-btn">Rel</button>
+                <button onclick="setPnlView('unreal')" id="pnl-btn-unreal" class="pnl-mode-btn">Unr</button>
+            </div>
+          </div>
+          <div style="height:270px"><canvas id="chartPnLTrend"></canvas></div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">📈 Holdings Summary</div>
         
-        <h4 style="margin: 0 0 12px 0; color:var(--text-muted); font-size:0.9rem;">💼 Equity / Debt / Commodity</h4>
+        <h4 style="margin: 0 0 12px 0; color:var(--text-muted); font-size:0.8rem;">💼 Equity / Debt / Commodity</h4>
         <div class="table-container">
             <table class="summary-table" id="eqSummaryTable">
                 <thead>
-                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">💰 Total Realized Profit:</td><td colspan="2" id="sum_real_pl">₹0.00</td></tr>
-                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">📊 Total Unrealized Profit:</td><td colspan="2" id="sum_unreal_pl">₹0.00</td></tr>
-                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">📈 Total Realized Return %:</td><td colspan="2" id="sum_real_ret">0.00%</td></tr>
-                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">🚀 Total Unrealized Return %:</td><td colspan="2" id="sum_unreal_ret">0.00%</td></tr>
-                    <tr><th>Scrip</th><th>Instrument</th><th>Net Qty</th><th>Avg Price</th><th>Realized P&L</th><th>Unrealized P&L</th></tr>
+                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">💰 Realized:</td><td colspan="2" id="sum_real_pl">₹0.00</td></tr>
+                    <tr class="summary-total-row"><td colspan="4" style="text-align:right">📊 Unrealized:</td><td colspan="2" id="sum_unreal_pl">₹0.00</td></tr>
+                    <tr><th>Scrip</th><th>Instrument</th><th>Qty</th><th>Avg</th><th>Real P&L</th><th>Unreal P&L</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
 
-        <h4 style="margin: 32px 0 12px 0; color:var(--text-muted); font-size:0.9rem;">⚡ F&O (Futures & Options)</h4>
+        <h4 style="margin: 32px 0 12px 0; color:var(--text-muted); font-size:0.8rem;">⚡ F&O (Futures & Options)</h4>
         <div class="table-container">
             <table class="summary-table" id="foSummaryTable">
                 <thead>
-                    <tr class="summary-total-row"><td colspan="5" style="text-align:right">🎯 Total F&O Return:</td><td id="sum_fo_pl">₹0.00</td></tr>
-                    <tr><th>Name</th><th>Lot Size</th><th>Net Lots</th><th>Net Qty</th><th>Avg Price</th><th>P&L</th></tr>
+                    <tr class="summary-total-row"><td colspan="5" style="text-align:right">🎯 Total F&O:</td><td id="sum_fo_pl">₹0.00</td></tr>
+                    <tr><th>Name</th><th>Lot</th><th>Net Lots</th><th>Net Qty</th><th>Avg</th><th>P&L</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
@@ -465,7 +560,7 @@
         <div class="card-header">📋 Recent Transactions</div>
         <div class="table-container">
           <table id="txTable">
-            <thead><tr><th>Type</th><th>Date</th><th>Scrip / Name</th><th>Details</th><th>Price</th><th>Port.</th><th>Act</th></tr></thead>
+            <thead><tr><th>Type</th><th>Date</th><th>Scrip</th><th>Details</th><th>Price</th><th>Port.</th><th>Act</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -483,12 +578,27 @@
     let chartI = null;
     let chartTrend = null;
     let chartPnLTrend = null;
+    
+    // P&L Trend Tracking
+    let pnlViewMode = 'total'; // 'total', 'real', 'unreal'
+    let currentTrendLabels = [];
+    let currentTrendValData = [];
+    let currentTrendPnlTotalData = [];
+    let currentTrendPnlRealData = [];
+    let currentTrendPnlUnrealData = [];
 
     // --- UI HELPERS ---
     function notify(msg, type='success') { const el=document.getElementById('notify'); el.textContent=msg; el.className=type; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
     function setToday(id) { document.getElementById(id).value = new Date().toISOString().split('T')[0]; }
     function fmtMoney(n) { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(n); }
     function switchTab(t) { document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); document.getElementById('eqForm').style.display=t==='eq'?'block':'none'; document.getElementById('foForm').style.display=t==='fo'?'block':'none'; }
+
+    function setPnlView(mode) {
+        pnlViewMode = mode;
+        document.querySelectorAll('.pnl-mode-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('pnl-btn-' + mode).classList.add('active');
+        updateCharts(); 
+    }
 
     // --- AUTOCOMPLETE LOGIC ---
     function updateSuggestions() {
@@ -768,7 +878,7 @@
       let activePosCount = 0;
       
       const eqRows = [];
-      const scripData = {}, instData = {};
+      const scripSummaryData = {}, instSummaryData = {};
 
       Object.values(eqGroups).forEach(g => {
         g.buys.sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -805,7 +915,7 @@
         if((isActive || hasHistory) && passesFilter) {
             if(isActive) {
                 totalVal += currentValue; totalUnrealizedPL += unrealizedPL; totalInvestedActive += cost; activePosCount++;
-                scripData[g.scrip] = currentValue; instData[g.instrument] = (instData[g.instrument] || 0) + currentValue;
+                scripSummaryData[g.scrip] = currentValue; instSummaryData[g.instrument] = (instSummaryData[g.instrument] || 0) + currentValue;
             }
             eqRows.push({ scrip: g.scrip, inst: g.instrument, qty: netQty, avg: avgPrice, real: realizedPL, unreal: unrealizedPL, closed: !isActive });
         }
@@ -851,39 +961,41 @@
 
       // --- TREND CALCULATION (CURRENT FY) ---
       const today = new Date();
-      const curMonth = today.getMonth() + 1; // 1-12
+      const curMonth = today.getMonth() + 1;
       const curYear = today.getFullYear();
       const fyStartYear = curMonth >= 4 ? curYear : curYear - 1;
       
-      let trendLabels = [];
-      let trendDataVals = [];
-      let trendPnLVals = [];
+      currentTrendLabels = [];
+      currentTrendValData = [];
+      currentTrendPnlTotalData = [];
+      currentTrendPnlRealData = [];
+      currentTrendPnlUnrealData = [];
 
       for (let y = fyStartYear; y <= curYear; y++) {
           let startM = (y === fyStartYear) ? 4 : 1;
           let endM = (y === curYear) ? curMonth : 12;
           for (let m = startM; m <= endM; m++) {
-              let lastDay = new Date(y, m, 0); // Last day of month
+              let lastDay = new Date(y, m, 0); 
               if (lastDay > today) lastDay = today;
               
               let monthStr = lastDay.toLocaleString('default', { month: 'short' });
-              trendLabels.push(`${monthStr} '${y.toString().slice(-2)}`);
+              currentTrendLabels.push(`${monthStr} '${y.toString().slice(-2)}`);
               
               const txsUpToDate = filtered.filter(t => new Date(t.date) <= lastDay);
               
               let valOnDate = 0;
-              let pnlOnDate = 0;
+              let realizedOnDate = 0;
+              let unrealizedOnDate = 0;
+              let foOnDate = 0;
               
-              // Mini FIFO for accurate end-of-month EQ evaluation
               const mEqGroups = {};
               txsUpToDate.filter(t=>t.section==='EQ').forEach(t => {
                   const scripName = String(t.scrip).toUpperCase();
                   if (!mEqGroups[scripName]) mEqGroups[scripName] = { buys: [], sells: [] };
-                  if (t.type === 'Buy') mEqGroups[scripName].buys.push({ ...t }); // shallow copy to protect original qty
+                  if (t.type === 'Buy') mEqGroups[scripName].buys.push({ ...t }); 
                   else mEqGroups[scripName].sells.push({ ...t });
               });
 
-              let monthRealized = 0, monthUnrealized = 0;
               Object.keys(mEqGroups).forEach(scrip => {
                   let g = mEqGroups[scrip];
                   g.buys.sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -892,7 +1004,7 @@
                       while(qtyToSell > 0 && g.buys.length > 0) {
                           const head = g.buys[0];
                           const take = Math.min(head.qty, qtyToSell);
-                          monthRealized += (take * (s.price - head.price));
+                          realizedOnDate += (take * (s.price - head.price));
                           head.qty -= take;
                           qtyToSell -= take;
                           if(head.qty === 0) g.buys.shift();
@@ -900,16 +1012,12 @@
                   });
                   let netQty = 0, cost = 0;
                   g.buys.forEach(b => { netQty += b.qty; cost += (b.qty * b.price); });
-                  
                   let avg = netQty > 0 ? cost/netQty : 0;
                   let ltp = ltpMap[scrip] || avg;
-                  
                   valOnDate += (netQty * ltp);
-                  monthUnrealized += ((netQty * ltp) - cost);
+                  unrealizedOnDate += ((netQty * ltp) - cost);
               });
               
-              // Mini aggregation for accurate end-of-month FO evaluation
-              let monthFO = 0;
               const mFoGroups = {};
               txsUpToDate.filter(t=>t.section==='FO').forEach(t => {
                   const foName = String(t.name).toUpperCase();
@@ -925,20 +1033,18 @@
                   const tShortProceeds = g.shorts.reduce((s,x)=>s+(x.lots*x.price),0);
                   const tLongLots = g.longs.reduce((s,x)=>s+x.lots,0);
                   const tShortLots = g.shorts.reduce((s,x)=>s+x.lots,0);
-                  
                   const netLots = tLongLots - tShortLots;
                   const foName = key.split('||')[0];
                   const ltp = ltpMap[foName] || 0;
-                  
                   let pl = (tShortProceeds - tLongCost) * g.lotsize;
                   if(netLots !== 0 && ltp > 0) { pl += (netLots * ltp * g.lotsize); }
-                  monthFO += pl;
+                  foOnDate += pl;
               });
 
-              pnlOnDate = monthRealized + monthUnrealized + monthFO;
-
-              trendDataVals.push(valOnDate);
-              trendPnLVals.push(pnlOnDate);
+              currentTrendValData.push(valOnDate);
+              currentTrendPnlRealData.push(realizedOnDate + foOnDate); // F&O is realized or MTM treated as realized
+              currentTrendPnlUnrealData.push(unrealizedOnDate);
+              currentTrendPnlTotalData.push(realizedOnDate + unrealizedOnDate + foOnDate);
           }
       }
 
@@ -974,11 +1080,6 @@
       document.getElementById('sum_fo_pl').textContent = fmtMoney(totalFOPL);
       document.getElementById('sum_fo_pl').className = totalFOPL>=0?'success':'danger';
 
-      const realRet = totalInvestedRealized > 0 ? (totalRealizedPL/totalInvestedRealized)*100 : 0;
-      document.getElementById('sum_real_ret').textContent = realRet.toFixed(2) + '%';
-      const unrealRet = totalInvestedActive > 0 ? (totalUnrealizedPL/totalInvestedActive)*100 : 0;
-      document.getElementById('sum_unreal_ret').textContent = unrealRet.toFixed(2) + '%';
-
       const totalPL = totalRealizedPL + totalUnrealizedPL + totalFOPL;
       const totalInvested = totalInvestedActive + totalInvestedRealized;
       const overallRet = totalInvested > 0 ? (totalPL/totalInvested)*100 : 0;
@@ -989,10 +1090,14 @@
       document.getElementById('d_ret').textContent = overallRet.toFixed(2) + '%';
       document.getElementById('d_pos').textContent = activePosCount;
 
-      updateCharts(scripData, instData, { labels: trendLabels, valData: trendDataVals, pnlData: trendPnLVals });
+      updateCharts(scripSummaryData, instSummaryData);
     }
 
-    function updateCharts(scripD, instD, trendD) {
+    function updateCharts(scripD, instD) {
+      // Use summary data if provided, otherwise preserve existing chart state
+      const sData = scripD || (chartS ? chartS.data.datasets[0].data : {});
+      const iData = instD || (chartI ? chartI.data.datasets[0].data : {});
+
       const ctxS = document.getElementById('chartScrip').getContext('2d');
       const ctxI = document.getElementById('chartInst').getContext('2d');
       const ctxT = document.getElementById('chartTrend').getContext('2d');
@@ -1003,73 +1108,73 @@
       
       const commonOpts = { plugins: { legend: { display:false } }, cutout: '65%', responsive:true, maintainAspectRatio:false };
       
-      chartS = new Chart(ctxS, { type: 'doughnut', data: { labels: Object.keys(scripD), datasets: [{ data: Object.values(scripD), backgroundColor: ['#818cf8','#34d399','#fbbf24','#f87171','#a78bfa', '#f472b6', '#60a5fa'], borderWidth:0 }] }, options: commonOpts });
-      
-      chartI = new Chart(ctxI, { type: 'doughnut', data: { labels: Object.keys(instD), datasets: [{ data: Object.values(instD), backgroundColor: ['#60a5fa','#c084fc','#f472b6'], borderWidth:0 }] }, options: commonOpts });
+      if(scripD) {
+        chartS = new Chart(ctxS, { type: 'doughnut', data: { labels: Object.keys(scripD), datasets: [{ data: Object.values(scripD), backgroundColor: ['#818cf8','#34d399','#fbbf24','#f87171','#a78bfa', '#f472b6', '#60a5fa'], borderWidth:0 }] }, options: commonOpts });
+        chartI = new Chart(ctxI, { type: 'doughnut', data: { labels: Object.keys(instD), datasets: [{ data: Object.values(instD), backgroundColor: ['#60a5fa','#c084fc','#f472b6'], borderWidth:0 }] }, options: commonOpts });
+      }
 
-      // Trend Chart Initialization
+      // Portfolio Value Trend
       chartTrend = new Chart(ctxT, {
           type: 'line',
           data: {
-              labels: trendD.labels,
+              labels: currentTrendLabels,
               datasets: [{
-                  label: 'Portfolio Value (₹)',
-                  data: trendD.valData,
+                  label: 'Value',
+                  data: currentTrendValData,
                   borderColor: '#4f46e5',
                   backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                  borderWidth: 3,
+                  borderWidth: 2,
                   fill: true,
-                  tension: 0.4,
-                  pointBackgroundColor: '#4f46e5',
-                  pointBorderColor: '#fff',
-                  pointBorderWidth: 2,
-                  pointRadius: 4
+                  tension: 0.3,
+                  pointRadius: 2
               }]
           },
           options: {
               responsive: true,
               maintainAspectRatio: false,
-              plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return fmtMoney(context.raw); } } } },
+              plugins: { legend: { display: false } },
               scales: {
-                  y: { beginAtZero: true, grid: { borderDash: [5, 5] }, ticks: { callback: function(value) { return '₹' + (value/1000 >= 1 ? (value/1000)+'k' : value); } } },
-                  x: { grid: { display: false } }
+                  y: { beginAtZero: true, ticks: { display: false }, grid: { display: false } },
+                  x: { grid: { display: false }, ticks: { font: { size: 9 } } }
               }
           }
       });
 
-      // P&L Chart Initialization
+      // P&L Trend (Supports Toggle)
+      let pnlData = currentTrendPnlTotalData;
+      let pnlColor = '#10b981';
+      if(pnlViewMode === 'real') { pnlData = currentTrendPnlRealData; pnlColor = '#3b82f6'; }
+      if(pnlViewMode === 'unreal') { pnlData = currentTrendPnlUnrealData; pnlColor = '#f59e0b'; }
+
       chartPnLTrend = new Chart(ctxPnL, {
           type: 'line',
           data: {
-              labels: trendD.labels,
+              labels: currentTrendLabels,
               datasets: [{
-                  label: 'Total P&L (₹)',
-                  data: trendD.pnlData,
-                  borderColor: '#10b981', // Success Green
-                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                  borderWidth: 3,
+                  label: 'P&L',
+                  data: pnlData,
+                  borderColor: pnlColor,
+                  backgroundColor: pnlColor + '1A',
+                  borderWidth: 2,
                   fill: true,
-                  tension: 0.4,
-                  pointBackgroundColor: '#10b981',
-                  pointBorderColor: '#fff',
-                  pointBorderWidth: 2,
-                  pointRadius: 4
+                  tension: 0.3,
+                  pointRadius: 2
               }]
           },
           options: {
               responsive: true,
               maintainAspectRatio: false,
-              plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return fmtMoney(context.raw); } } } },
+              plugins: { legend: { display: false } },
               scales: {
-                  y: { beginAtZero: true, grid: { borderDash: [5, 5] }, ticks: { callback: function(value) { return '₹' + (Math.abs(value)/1000 >= 1 ? (value/1000)+'k' : value); } } },
-                  x: { grid: { display: false } }
+                  y: { ticks: { display: false }, grid: { display: false } },
+                  x: { grid: { display: false }, ticks: { font: { size: 9 } } }
               }
           }
       });
     }
 
     async function fetchFromCloud() {
-      notify("Fetching LTP...", "success");
+      notify("Syncing...", "success");
       try {
         const res = await fetch(CLOUD_URL);
         const data = await res.json();
@@ -1099,17 +1204,15 @@
                     }
                 } 
             }); 
-            console.log("LTP Map Loaded:", ltpMap); 
         }
 
         if(newTx.length > 0) {
             transactions = newTx; 
             saveAndRender(); 
         }
-        notify("Synced with Cloud!");
+        notify("Synced!");
       } catch(e) { 
-        notify("Fetch Failed", "error"); 
-        console.error(e); 
+        notify("Sync Failed", "error"); 
       }
     }
     function fmtDate(d) { try { return new Date(d).toISOString().split('T')[0]; } catch { return ''; } }
