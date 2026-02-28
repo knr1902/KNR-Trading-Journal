@@ -88,6 +88,12 @@
       height: 400px; position: relative;
     }
 
+    .chart-box-full {
+      background: var(--bg-card); padding: 20px; border-radius: var(--radius);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border);
+      height: 350px; position: relative; margin-bottom: 24px;
+    }
+
     /* --- FORMS --- */
     .form-group { margin-bottom: 16px; }
     label {
@@ -246,10 +252,6 @@
     <div class="stat-card">
       <div class="stat-val" id="d_ret">0.00%</div>
       <div class="stat-lbl">Overall Return</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val" id="d_cagr">0.00%</div>
-      <div class="stat-lbl">CAGR</div>
     </div>
     <div class="stat-card">
       <div class="stat-val" id="d_pos">0</div>
@@ -417,6 +419,18 @@
         </div>
       </div>
 
+      <!-- Trend Graphs -->
+      <div class="charts-row">
+        <div class="chart-box">
+          <div class="card-header">📈 Portfolio Value (Current FY)</div>
+          <div style="height:320px"><canvas id="chartTrend"></canvas></div>
+        </div>
+        <div class="chart-box">
+          <div class="card-header">💸 Total P&L (Current FY)</div>
+          <div style="height:320px"><canvas id="chartPnLTrend"></canvas></div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header">📈 Holdings Summary</div>
         
@@ -467,6 +481,8 @@
     let ltpMap = {};
     let chartS = null;
     let chartI = null;
+    let chartTrend = null;
+    let chartPnLTrend = null;
 
     // --- UI HELPERS ---
     function notify(msg, type='success') { const el=document.getElementById('notify'); el.textContent=msg; el.className=type; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
@@ -691,15 +707,11 @@
       // Only for Equity/Debt which has 'scrip'
       if(tx.section === 'EQ' && tx.scrip) {
           const scripName = tx.scrip;
-          // Ask confirmation to be safe, so you don't delete scrips used by other transactions
           if(confirm(`Do you also want to delete "${scripName}" from the LTP Watchlist?`)) {
              await sendToCloud("deleteLTP", { scrip: scripName }, btn);
-             
-             // Remove from local map immediately so UI updates
              delete ltpMap[scripName]; 
              const clean = scripName.replace('NSE:', '').replace('BSE:', '').replace('-EQ', '').trim();
              delete ltpMap[clean];
-             
              calculateStats();
           }
       }
@@ -823,7 +835,7 @@
         const netLots = totalLongLots - totalShortLots;
         const ltp = ltpMap[g.name] || 0;
         
-        let pl = (totalShortProceeds - totalLongCost);
+        let pl = (totalShortProceeds - totalLongCost) * g.lotsize;
         if(netLots !== 0 && ltp > 0) { pl += (netLots * ltp * g.lotsize); }
 
         const isClosed = netLots === 0;
@@ -836,6 +848,99 @@
         }
       });
 
+
+      // --- TREND CALCULATION (CURRENT FY) ---
+      const today = new Date();
+      const curMonth = today.getMonth() + 1; // 1-12
+      const curYear = today.getFullYear();
+      const fyStartYear = curMonth >= 4 ? curYear : curYear - 1;
+      
+      let trendLabels = [];
+      let trendDataVals = [];
+      let trendPnLVals = [];
+
+      for (let y = fyStartYear; y <= curYear; y++) {
+          let startM = (y === fyStartYear) ? 4 : 1;
+          let endM = (y === curYear) ? curMonth : 12;
+          for (let m = startM; m <= endM; m++) {
+              let lastDay = new Date(y, m, 0); // Last day of month
+              if (lastDay > today) lastDay = today;
+              
+              let monthStr = lastDay.toLocaleString('default', { month: 'short' });
+              trendLabels.push(`${monthStr} '${y.toString().slice(-2)}`);
+              
+              const txsUpToDate = filtered.filter(t => new Date(t.date) <= lastDay);
+              
+              let valOnDate = 0;
+              let pnlOnDate = 0;
+              
+              // Mini FIFO for accurate end-of-month EQ evaluation
+              const mEqGroups = {};
+              txsUpToDate.filter(t=>t.section==='EQ').forEach(t => {
+                  const scripName = String(t.scrip).toUpperCase();
+                  if (!mEqGroups[scripName]) mEqGroups[scripName] = { buys: [], sells: [] };
+                  if (t.type === 'Buy') mEqGroups[scripName].buys.push({ ...t }); // shallow copy to protect original qty
+                  else mEqGroups[scripName].sells.push({ ...t });
+              });
+
+              let monthRealized = 0, monthUnrealized = 0;
+              Object.keys(mEqGroups).forEach(scrip => {
+                  let g = mEqGroups[scrip];
+                  g.buys.sort((a,b) => new Date(a.date) - new Date(b.date));
+                  g.sells.forEach(s => {
+                      let qtyToSell = s.qty;
+                      while(qtyToSell > 0 && g.buys.length > 0) {
+                          const head = g.buys[0];
+                          const take = Math.min(head.qty, qtyToSell);
+                          monthRealized += (take * (s.price - head.price));
+                          head.qty -= take;
+                          qtyToSell -= take;
+                          if(head.qty === 0) g.buys.shift();
+                      }
+                  });
+                  let netQty = 0, cost = 0;
+                  g.buys.forEach(b => { netQty += b.qty; cost += (b.qty * b.price); });
+                  
+                  let avg = netQty > 0 ? cost/netQty : 0;
+                  let ltp = ltpMap[scrip] || avg;
+                  
+                  valOnDate += (netQty * ltp);
+                  monthUnrealized += ((netQty * ltp) - cost);
+              });
+              
+              // Mini aggregation for accurate end-of-month FO evaluation
+              let monthFO = 0;
+              const mFoGroups = {};
+              txsUpToDate.filter(t=>t.section==='FO').forEach(t => {
+                  const foName = String(t.name).toUpperCase();
+                  const key = `${foName}||${t.lotsize}`;
+                  if (!mFoGroups[key]) mFoGroups[key] = { longs: [], shorts: [], lotsize: t.lotsize };
+                  if (t.type === 'Long') mFoGroups[key].longs.push(t);
+                  else mFoGroups[key].shorts.push(t);
+              });
+
+              Object.keys(mFoGroups).forEach(key => {
+                  let g = mFoGroups[key];
+                  const tLongCost = g.longs.reduce((s,x)=>s+(x.lots*x.price),0);
+                  const tShortProceeds = g.shorts.reduce((s,x)=>s+(x.lots*x.price),0);
+                  const tLongLots = g.longs.reduce((s,x)=>s+x.lots,0);
+                  const tShortLots = g.shorts.reduce((s,x)=>s+x.lots,0);
+                  
+                  const netLots = tLongLots - tShortLots;
+                  const foName = key.split('||')[0];
+                  const ltp = ltpMap[foName] || 0;
+                  
+                  let pl = (tShortProceeds - tLongCost) * g.lotsize;
+                  if(netLots !== 0 && ltp > 0) { pl += (netLots * ltp * g.lotsize); }
+                  monthFO += pl;
+              });
+
+              pnlOnDate = monthRealized + monthUnrealized + monthFO;
+
+              trendDataVals.push(valOnDate);
+              trendPnLVals.push(pnlOnDate);
+          }
+      }
 
       // --- RENDER TABLES ---
       const tbEq = document.querySelector('#eqSummaryTable tbody'); tbEq.innerHTML = '';
@@ -883,18 +988,84 @@
       document.getElementById('d_pl').style.color = totalPL>=0 ? 'var(--success)' : 'var(--danger)';
       document.getElementById('d_ret').textContent = overallRet.toFixed(2) + '%';
       document.getElementById('d_pos').textContent = activePosCount;
-      document.getElementById('d_cagr').textContent = overallRet.toFixed(2) + '%'; 
 
-      updateCharts(scripData, instData);
+      updateCharts(scripData, instData, { labels: trendLabels, valData: trendDataVals, pnlData: trendPnLVals });
     }
 
-    function updateCharts(scripD, instD) {
+    function updateCharts(scripD, instD, trendD) {
       const ctxS = document.getElementById('chartScrip').getContext('2d');
       const ctxI = document.getElementById('chartInst').getContext('2d');
-      if(chartS) chartS.destroy(); if(chartI) chartI.destroy();
+      const ctxT = document.getElementById('chartTrend').getContext('2d');
+      const ctxPnL = document.getElementById('chartPnLTrend').getContext('2d');
+
+      if(chartS) chartS.destroy(); if(chartI) chartI.destroy(); 
+      if(chartTrend) chartTrend.destroy(); if(chartPnLTrend) chartPnLTrend.destroy();
+      
       const commonOpts = { plugins: { legend: { display:false } }, cutout: '65%', responsive:true, maintainAspectRatio:false };
+      
       chartS = new Chart(ctxS, { type: 'doughnut', data: { labels: Object.keys(scripD), datasets: [{ data: Object.values(scripD), backgroundColor: ['#818cf8','#34d399','#fbbf24','#f87171','#a78bfa', '#f472b6', '#60a5fa'], borderWidth:0 }] }, options: commonOpts });
+      
       chartI = new Chart(ctxI, { type: 'doughnut', data: { labels: Object.keys(instD), datasets: [{ data: Object.values(instD), backgroundColor: ['#60a5fa','#c084fc','#f472b6'], borderWidth:0 }] }, options: commonOpts });
+
+      // Trend Chart Initialization
+      chartTrend = new Chart(ctxT, {
+          type: 'line',
+          data: {
+              labels: trendD.labels,
+              datasets: [{
+                  label: 'Portfolio Value (₹)',
+                  data: trendD.valData,
+                  borderColor: '#4f46e5',
+                  backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                  borderWidth: 3,
+                  fill: true,
+                  tension: 0.4,
+                  pointBackgroundColor: '#4f46e5',
+                  pointBorderColor: '#fff',
+                  pointBorderWidth: 2,
+                  pointRadius: 4
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return fmtMoney(context.raw); } } } },
+              scales: {
+                  y: { beginAtZero: true, grid: { borderDash: [5, 5] }, ticks: { callback: function(value) { return '₹' + (value/1000 >= 1 ? (value/1000)+'k' : value); } } },
+                  x: { grid: { display: false } }
+              }
+          }
+      });
+
+      // P&L Chart Initialization
+      chartPnLTrend = new Chart(ctxPnL, {
+          type: 'line',
+          data: {
+              labels: trendD.labels,
+              datasets: [{
+                  label: 'Total P&L (₹)',
+                  data: trendD.pnlData,
+                  borderColor: '#10b981', // Success Green
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                  borderWidth: 3,
+                  fill: true,
+                  tension: 0.4,
+                  pointBackgroundColor: '#10b981',
+                  pointBorderColor: '#fff',
+                  pointBorderWidth: 2,
+                  pointRadius: 4
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return fmtMoney(context.raw); } } } },
+              scales: {
+                  y: { beginAtZero: true, grid: { borderDash: [5, 5] }, ticks: { callback: function(value) { return '₹' + (Math.abs(value)/1000 >= 1 ? (value/1000)+'k' : value); } } },
+                  x: { grid: { display: false } }
+              }
+          }
+      });
     }
 
     async function fetchFromCloud() {
